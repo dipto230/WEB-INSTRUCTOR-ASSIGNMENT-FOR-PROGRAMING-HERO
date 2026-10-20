@@ -1,8 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 import AppError from "../utils/AppError";
 
+interface ValidationError extends Error {
+  statusCode?: number;
+  errors?: {
+    field: string;
+    message: string;
+  }[];
+}
+
 const errorHandler = (
-  error: Error,
+  error: ValidationError,
   _req: Request,
   res: Response,
   _next: NextFunction,
@@ -13,6 +21,14 @@ const errorHandler = (
     return res.status(error.statusCode).json({
       success: false,
       message: error.message,
+    });
+  }
+
+  if (error.statusCode === 400 && error.errors) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+      errors: error.errors,
     });
   }
 

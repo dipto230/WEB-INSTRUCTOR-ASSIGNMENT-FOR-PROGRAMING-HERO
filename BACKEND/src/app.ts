@@ -1,5 +1,6 @@
 import express from "express";
 import errorHandler from "./middlewares/errorHandler";
+import authRoutes from "./modules/auth/auth.routes";
 
 const app = express();
 
@@ -11,6 +12,8 @@ app.get("/", (_req, res) => {
     message: "Project Submission API is running",
   });
 });
+
+app.use("/api/auth", authRoutes);
 
 app.use(errorHandler);
 
