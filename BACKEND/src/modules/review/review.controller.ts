@@ -11,6 +11,7 @@ import {
   getSubmissions,
   approveSubmission,
   rejectSubmission,
+  getSubmissionStatistics,
 } from "./review.service";
 
 import {
@@ -141,6 +142,27 @@ export const rejectSubmissionController =
         message:
           "Submission rejected successfully",
         data: submission,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+export const getSubmissionStatisticsController =
+  async (
+    _req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const statistics =
+        await getSubmissionStatistics();
+
+      res.status(200).json({
+        success: true,
+        message:
+          "Submission statistics retrieved successfully",
+        data: statistics,
       });
     } catch (error) {
       next(error);

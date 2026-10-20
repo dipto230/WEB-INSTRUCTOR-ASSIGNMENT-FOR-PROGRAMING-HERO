@@ -263,3 +263,42 @@ export const rejectSubmission =
 
     return updatedSubmission;
   };
+
+  export const getSubmissionStatistics =
+  async () => {
+    const [
+      total,
+      pending,
+      approved,
+      rejected,
+    ] = await Promise.all([
+      prisma.submission.count(),
+
+      prisma.submission.count({
+        where: {
+          status: SubmissionStatus.PENDING,
+        },
+      }),
+
+      prisma.submission.count({
+        where: {
+          status:
+            SubmissionStatus.APPROVED,
+        },
+      }),
+
+      prisma.submission.count({
+        where: {
+          status:
+            SubmissionStatus.REJECTED,
+        },
+      }),
+    ]);
+
+    return {
+      total,
+      pending,
+      approved,
+      rejected,
+    };
+  };

@@ -6,7 +6,6 @@ import {
 } from "../../middlewares/auth";
 
 
-
 import validate from "../../middlewares/validation";
 
 import {
@@ -15,13 +14,21 @@ import {
 } from "./review.validation";
 
 import {
-    approveSubmissionController,
   getSubmissionsController,
+  approveSubmissionController,
   rejectSubmissionController,
+  getSubmissionStatisticsController,
 } from "./review.controller";
 import { Role } from "../../generated/prisma/enums";
 
 const router = Router();
+
+router.get(
+  "/statistics",
+  authenticate,
+  authorize(Role.MENTOR),
+  getSubmissionStatisticsController,
+);
 
 router.get(
   "/submissions",
@@ -33,6 +40,7 @@ router.get(
   ),
   getSubmissionsController,
 );
+
 router.patch(
   "/submissions/:id/approve",
   authenticate,
@@ -54,4 +62,5 @@ router.patch(
   ),
   rejectSubmissionController,
 );
+
 export default router;

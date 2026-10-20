@@ -1,24 +1,18 @@
 model Submission {
-  id          String           @id @default(cuid())
-
-  projectName String
-  repoUrl     String
-  liveLink    String
-  description String
-
-  status      SubmissionStatus @default(PENDING)
-
-  studentId   String
-  student     User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
-
+  id           String           @id @default(cuid())
+  projectName  String
+  repoUrl      String
+  liveLink     String
+  description  String
+  status       SubmissionStatus @default(PENDING)
+  studentId    String
   reviewedById String?
-  reviewedBy   User?           @relation("ReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
-
-  reviewedAt DateTime?
-  reviewNote String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  reviewedAt   DateTime?
+  reviewNote   String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  reviewedBy   User?            @relation("ReviewedBy", fields: [reviewedById], references: [id])
+  student      User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, repoUrl])
   @@index([studentId])

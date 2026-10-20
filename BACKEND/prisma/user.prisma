@@ -1,13 +1,11 @@
 model User {
-  id           String   @id @default(cuid())
+  id           String       @id @default(cuid())
   name         String
-  email        String   @unique
+  email        String       @unique
   passwordHash String
-  role         Role     @default(STUDENT)
-
-  submissions  Submission[]
+  role         Role         @default(STUDENT)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
   reviews      Submission[] @relation("ReviewedBy")
-
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  submissions  Submission[]
 }
