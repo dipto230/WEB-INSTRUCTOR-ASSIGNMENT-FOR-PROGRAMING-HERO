@@ -10,6 +10,10 @@ import {
 import validate from "../../middlewares/validation";
 
 import {
+  submissionRateLimiter,
+} from "../../middlewares/rateLimiter";
+
+import {
   createSubmissionSchema,
 } from "./submission.validation";
 
@@ -22,6 +26,7 @@ const router = Router();
 
 router.post(
   "/",
+  submissionRateLimiter,
   authenticate,
   authorize(Role.STUDENT),
   validate(createSubmissionSchema),

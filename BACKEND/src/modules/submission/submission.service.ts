@@ -23,26 +23,42 @@ export const createSubmission = async (
     );
   }
 
-  const submission =
-    await prisma.submission.create({
-      data: {
-        projectName: data.projectName,
-        repoUrl: data.repoUrl,
-        liveLink: data.liveLink,
-        description: data.description,
-        studentId,
-      },
+  try {
+    const submission =
+      await prisma.submission.create({
+        data: {
+          projectName: data.projectName,
+          repoUrl: data.repoUrl,
+          liveLink: data.liveLink,
+          description: data.description,
+          studentId,
+        },
 
-      select: {
-        id: true,
-        projectName: true,
-        repoUrl: true,
-        liveLink: true,
-        description: true,
-        status: true,
-        createdAt: true,
-      },
-    });
+        select: {
+          id: true,
+          projectName: true,
+          repoUrl: true,
+          liveLink: true,
+          description: true,
+          status: true,
+          createdAt: true,
+        },
+      });
 
-  return submission;
+    return submission;
+  } catch (error: unknown) {
+    if (
+      error instanceof Error &&
+      error.message.includes(
+        "Unique constraint failed",
+      )
+    ) {
+      throw new AppError(
+        "You have already submitted this repository",
+        409,
+      );
+    }
+
+    throw error;
+  }
 };
