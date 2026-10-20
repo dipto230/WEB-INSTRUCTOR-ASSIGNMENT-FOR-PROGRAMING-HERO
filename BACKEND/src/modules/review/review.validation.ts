@@ -33,5 +33,22 @@ export const getSubmissionsQuerySchema = z.object({
     .optional(),
 });
 
+export const reviewSubmissionSchema =
+  z.object({
+    reviewNote: z
+      .string()
+      .trim()
+      .max(
+        1000,
+        "Review note must not exceed 1000 characters",
+      )
+      .optional(),
+  });
+
+export type ReviewSubmissionInput =
+  z.infer<
+    typeof reviewSubmissionSchema
+  >;
+
 export type GetSubmissionsQuery =
   z.infer<typeof getSubmissionsQuerySchema>;
