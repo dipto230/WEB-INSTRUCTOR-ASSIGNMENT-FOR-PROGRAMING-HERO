@@ -1,7 +1,9 @@
+
 import prisma from "../../config/prisma";
 import AppError from "../../utils/AppError";
-import { hashPassword } from "../../utils/password";
-import { SignupInput } from "./auth.validation";
+import { hashPassword, comparePassword } from "../../utils/password";
+import { generateToken } from "../../utils/jwt";
+import { SignupInput, LoginInput } from "./auth.validation";
 
 export const signup = async ({
   name,
@@ -36,4 +38,44 @@ export const signup = async ({
   });
 
   return user;
+};
+
+export const login = async ({
+  email,
+  password,
+}: LoginInput) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+  });
+
+  if (!user) {
+    throw new AppError("Invalid email or password", 401);
+  }
+
+  const passwordMatched = await comparePassword(
+    password,
+    user.passwordHash,
+  );
+
+  if (!passwordMatched) {
+    throw new AppError("Invalid email or password", 401);
+  }
+
+  const token = generateToken({
+    userId: user.id,
+    role: user.role,
+  });
+
+  return {
+    token,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      createdAt: user.createdAt,
+    },
+  };
 };
