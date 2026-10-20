@@ -1,8 +1,10 @@
+
 import jwt, { type SignOptions } from "jsonwebtoken";
+import { Role } from "../generated/prisma/enums";
 
 interface JwtPayload {
   userId: string;
-  role: "STUDENT" | "MENTOR";
+  role: Role;
 }
 
 const getJwtSecret = (): string => {
