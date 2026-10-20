@@ -9,10 +9,13 @@ import {
 
 import {
   getSubmissions,
+  approveSubmission,
+  rejectSubmission,
 } from "./review.service";
 
 import {
   GetSubmissionsQuery,
+  ReviewSubmissionInput,
 } from "./review.validation";
 
 interface ValidatedQueryRequest
@@ -46,6 +49,98 @@ export const getSubmissionsController =
         message:
           "Submissions retrieved successfully",
         data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+export const approveSubmissionController =
+  async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message:
+            "Authentication required",
+        });
+      }
+
+      const submissionId =
+        req.params.id;
+
+      if (
+        typeof submissionId !== "string"
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Invalid submission ID",
+        });
+      }
+
+      const submission =
+        await approveSubmission(
+          submissionId,
+          req.user.userId,
+          req.body as ReviewSubmissionInput,
+        );
+
+      res.status(200).json({
+        success: true,
+        message:
+          "Submission approved successfully",
+        data: submission,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+export const rejectSubmissionController =
+  async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message:
+            "Authentication required",
+        });
+      }
+
+      const submissionId =
+        req.params.id;
+
+      if (
+        typeof submissionId !== "string"
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Invalid submission ID",
+        });
+      }
+
+      const submission =
+        await rejectSubmission(
+          submissionId,
+          req.user.userId,
+          req.body as ReviewSubmissionInput,
+        );
+
+      res.status(200).json({
+        success: true,
+        message:
+          "Submission rejected successfully",
+        data: submission,
       });
     } catch (error) {
       next(error);

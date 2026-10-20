@@ -11,10 +11,13 @@ import validate from "../../middlewares/validation";
 
 import {
   getSubmissionsQuerySchema,
+  reviewSubmissionSchema,
 } from "./review.validation";
 
 import {
+    approveSubmissionController,
   getSubmissionsController,
+  rejectSubmissionController,
 } from "./review.controller";
 import { Role } from "../../generated/prisma/enums";
 
@@ -30,5 +33,25 @@ router.get(
   ),
   getSubmissionsController,
 );
+router.patch(
+  "/submissions/:id/approve",
+  authenticate,
+  authorize(Role.MENTOR),
+  validate(
+    reviewSubmissionSchema,
+    "body",
+  ),
+  approveSubmissionController,
+);
 
+router.patch(
+  "/submissions/:id/reject",
+  authenticate,
+  authorize(Role.MENTOR),
+  validate(
+    reviewSubmissionSchema,
+    "body",
+  ),
+  rejectSubmissionController,
+);
 export default router;
