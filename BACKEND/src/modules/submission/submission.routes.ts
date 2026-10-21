@@ -19,6 +19,7 @@ import {
 
 import {
   createSubmissionController,
+  getMySubmissionsController,
 } from "./submission.controller";
 import { Role } from "../../generated/prisma/enums";
 
@@ -31,6 +32,12 @@ router.post(
   authorize(Role.STUDENT),
   validate(createSubmissionSchema),
   createSubmissionController,
+);
+router.get(
+  "/my",
+  authenticate,
+  authorize(Role.STUDENT),
+  getMySubmissionsController,
 );
 
 export default router;
