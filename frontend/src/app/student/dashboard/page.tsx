@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client";
 
@@ -12,6 +13,9 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/src/hooks/useAuth";
 import api from "@/src/lib/api";
 import { logout } from "@/src/lib/auth";
+import MySubmissions, {
+  Submission,
+} from "@/src/components/student/MySubmissions";
 
 const submissionSchema = z.object({
   projectName: z
@@ -44,6 +48,8 @@ export default function StudentDashboard() {
   const { user, loading } = useAuth();
 
   const [serverError, setServerError] = useState("");
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [submissionsLoading, setSubmissionsLoading] = useState(false);
 
   const {
     register,
@@ -54,7 +60,7 @@ export default function StudentDashboard() {
     resolver: zodResolver(submissionSchema),
   });
 
-  // Redirect unauthenticated users and users with the wrong role.
+
   useEffect(() => {
     if (loading) return;
 
@@ -68,6 +74,25 @@ export default function StudentDashboard() {
     }
   }, [user, loading, router]);
 
+
+  const fetchMySubmissions = async () => {
+    try {
+      setSubmissionsLoading(true);
+
+      const response = await api.get("/submissions/my");
+
+      setSubmissions(response.data.data);
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        "Failed to load your submissions.";
+
+      toast.error(message);
+    } finally {
+      setSubmissionsLoading(false);
+    }
+  };
+
   const onSubmit = async (data: SubmissionFormData) => {
     try {
       setServerError("");
@@ -77,6 +102,9 @@ export default function StudentDashboard() {
       toast.success("Project submitted successfully");
 
       reset();
+
+   
+      await fetchMySubmissions();
     } catch (error: any) {
       const message =
         error?.response?.data?.message ||
@@ -92,7 +120,7 @@ export default function StudentDashboard() {
     router.push("/login");
   };
 
-  // Show loading state while authentication is being checked.
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -101,17 +129,17 @@ export default function StudentDashboard() {
     );
   }
 
-  // Prevent dashboard content from rendering before redirect.
+
   if (!user || user.role !== "STUDENT") {
     return null;
   }
 
   return (
     <main className="min-h-screen bg-muted/40">
-      {/* Navbar */}
+  
       <header className="border-b bg-background">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          {/* Logo / Title */}
+      
           <div>
             <h1 className="text-xl font-bold">
               Project Submission Portal
@@ -122,10 +150,12 @@ export default function StudentDashboard() {
             </p>
           </div>
 
-          {/* User Info + Logout */}
+     
           <div className="flex items-center gap-4">
             <div className="hidden text-right sm:block">
-              <p className="text-sm font-medium">{user.name}</p>
+              <p className="text-sm font-medium">
+                {user.name}
+              </p>
 
               <p className="text-xs text-muted-foreground">
                 {user.email}
@@ -144,145 +174,173 @@ export default function StudentDashboard() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="mx-auto max-w-3xl px-6 py-10">
-        {/* Page Heading */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold">
-            Submit Your Project
-          </h2>
+     
+      <div className="mx-auto max-w-5xl px-6 py-10">
+       
+        <section className="mb-12">
+     
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold">
+              Submit Your Project
+            </h2>
 
-          <p className="mt-1 text-sm text-muted-foreground">
-            Submit your GitHub repository and live project
-            for mentor review.
-          </p>
-        </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Submit your GitHub repository and live project
+              for mentor review.
+            </p>
+          </div>
 
-        {/* Submission Form */}
-        <div className="rounded-xl border bg-background p-6 shadow-sm">
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="space-y-6"
-          >
-            {/* Project Name */}
-            <div className="space-y-2">
-              <label
-                htmlFor="projectName"
-                className="text-sm font-medium"
-              >
-                Project Name
-              </label>
-
-              <input
-                id="projectName"
-                type="text"
-                placeholder="E-Waste Management System"
-                {...register("projectName")}
-                className="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2"
-              />
-
-              {errors.projectName && (
-                <p className="text-sm text-destructive">
-                  {errors.projectName.message}
-                </p>
-              )}
-            </div>
-
-            {/* Repository URL */}
-            <div className="space-y-2">
-              <label
-                htmlFor="repoUrl"
-                className="text-sm font-medium"
-              >
-                GitHub Repository URL
-              </label>
-
-              <input
-                id="repoUrl"
-                type="url"
-                placeholder="https://github.com/username/project"
-                {...register("repoUrl")}
-                className="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2"
-              />
-
-              {errors.repoUrl && (
-                <p className="text-sm text-destructive">
-                  {errors.repoUrl.message}
-                </p>
-              )}
-            </div>
-
-            {/* Live Project Link */}
-            <div className="space-y-2">
-              <label
-                htmlFor="liveLink"
-                className="text-sm font-medium"
-              >
-                Live Project Link
-              </label>
-
-              <input
-                id="liveLink"
-                type="url"
-                placeholder="https://my-project.vercel.app"
-                {...register("liveLink")}
-                className="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2"
-              />
-
-              {errors.liveLink && (
-                <p className="text-sm text-destructive">
-                  {errors.liveLink.message}
-                </p>
-              )}
-            </div>
-
-            {/* Project Description */}
-            <div className="space-y-2">
-              <label
-                htmlFor="description"
-                className="text-sm font-medium"
-              >
-                Project Description
-              </label>
-
-              <textarea
-                id="description"
-                rows={6}
-                placeholder="Describe your project, its main features, technologies used, and what you implemented..."
-                {...register("description")}
-                className="flex min-h-[140px] w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2"
-              />
-
-              {errors.description && (
-                <p className="text-sm text-destructive">
-                  {errors.description.message}
-                </p>
-              )}
-            </div>
-
-            {/* Backend Error */}
-            {serverError && (
-              <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-                {serverError}
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="inline-flex h-11 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+     
+          <div className="rounded-xl border bg-background p-6 shadow-sm">
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="space-y-6"
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                "Submit Project"
+     
+              <div className="space-y-2">
+                <label
+                  htmlFor="projectName"
+                  className="text-sm font-medium"
+                >
+                  Project Name
+                </label>
+
+                <input
+                  id="projectName"
+                  type="text"
+                  placeholder="E-Waste Management System"
+                  {...register("projectName")}
+                  className="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2"
+                />
+
+                {errors.projectName && (
+                  <p className="text-sm text-destructive">
+                    {errors.projectName.message}
+                  </p>
+                )}
+              </div>
+
+    
+              <div className="space-y-2">
+                <label
+                  htmlFor="repoUrl"
+                  className="text-sm font-medium"
+                >
+                  GitHub Repository URL
+                </label>
+
+                <input
+                  id="repoUrl"
+                  type="url"
+                  placeholder="https://github.com/username/project"
+                  {...register("repoUrl")}
+                  className="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2"
+                />
+
+                {errors.repoUrl && (
+                  <p className="text-sm text-destructive">
+                    {errors.repoUrl.message}
+                  </p>
+                )}
+              </div>
+
+       
+              <div className="space-y-2">
+                <label
+                  htmlFor="liveLink"
+                  className="text-sm font-medium"
+                >
+                  Live Project Link
+                </label>
+
+                <input
+                  id="liveLink"
+                  type="url"
+                  placeholder="https://my-project.vercel.app"
+                  {...register("liveLink")}
+                  className="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2"
+                />
+
+                {errors.liveLink && (
+                  <p className="text-sm text-destructive">
+                    {errors.liveLink.message}
+                  </p>
+                )}
+              </div>
+
+         
+              <div className="space-y-2">
+                <label
+                  htmlFor="description"
+                  className="text-sm font-medium"
+                >
+                  Project Description
+                </label>
+
+                <textarea
+                  id="description"
+                  rows={6}
+                  placeholder="Describe your project, its main features, technologies used, and what you implemented..."
+                  {...register("description")}
+                  className="flex min-h-[140px] w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2"
+                />
+
+                {errors.description && (
+                  <p className="text-sm text-destructive">
+                    {errors.description.message}
+                  </p>
+                )}
+              </div>
+
+            
+              {serverError && (
+                <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                  {serverError}
+                </div>
               )}
-            </button>
-          </form>
+
+           
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="inline-flex h-11 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit Project"
+                )}
+              </button>
+            </form>
+          </div>
+        </section>
+
+      
+        <MySubmissions
+          submissions={submissions}
+          loading={submissionsLoading}
+        />
+
+     
+        <div className="mt-6 flex justify-center">
+          <button
+            type="button"
+            onClick={fetchMySubmissions}
+            disabled={submissionsLoading}
+            className="inline-flex h-10 items-center justify-center rounded-md border bg-background px-4 text-sm font-medium hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {submissionsLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              "Load My Submissions"
+            )}
+          </button>
         </div>
       </div>
     </main>
