@@ -1,5 +1,6 @@
-import api from "@/lib/api";
-import { SignupData, User } from "@/types/auth";
+import api from "@/src/lib/api";
+import { SignupData, User } from "@/src/types/auth";
+
 
 export const signupAction = async (
   data: SignupData,
