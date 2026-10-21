@@ -1,5 +1,6 @@
 import Features from "../components/home/Features";
 import Hero from "../components/home/Hero";
+import HowItWorks from "../components/home/HowItWorks";
 import Navbar from "../components/home/Navbar";
 
 
@@ -9,7 +10,8 @@ export default function HomePage() {
     <main className="min-h-screen bg-background">
       <Navbar />
       <Hero />
-      <Features/>
+      <Features />
+      <HowItWorks/>
     </main>
   );
 }
