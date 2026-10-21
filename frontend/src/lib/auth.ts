@@ -1,4 +1,5 @@
-import { User } from "@/types/auth";
+import { User } from "../types/auth";
+
 
 export const saveAuth = (
   token: string,
